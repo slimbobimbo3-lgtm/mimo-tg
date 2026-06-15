@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MiMo Code — AI Remote Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0b0e;--fg:rgba(255,255,255,.9);--dim:rgba(255,255,255,.4);--accent:#b8a9ff;--accent2:#8b7cf7;--green:#7ee8a0;--muted:rgba(255,255,255,.08)}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
+
+/* Smooth scroll reveal */
+.reveal{opacity:0;transform:translateY(60px);transition:all .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-delay{transition-delay:.15s}
+.reveal-delay2{transition-delay:.3s}
+.reveal-delay3{transition-delay:.45s}
+
+/* Gradient text */
+.grad{background:linear-gradient(135deg,#b8a9ff,#6c5ce7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.grad-green{background:linear-gradient(135deg,#7ee8a0,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 0;backdrop-filter:blur(20px);background:rgba(12,11,14,.6);border-bottom:1px solid var(--muted);transition:all .3s}
+.nav-in{max-width:1100px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg)}
+.nav-logo .ico{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6c5ce7);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:var(--dim);text-decoration:none;font-size:13px;transition:color .2s;font-weight:400}
+.nav-links a:hover{color:var(--fg)}
+.nav-cta{padding:8px 20px;border-radius:10px;background:rgba(139,124,247,.12);color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;border:1px solid rgba(139,124,247,.15);transition:all .2s}
+.nav-cta:hover{background:rgba(139,124,247,.2);border-color:rgba(139,124,247,.3)}
+
+/* Sections */
+section{padding:120px 0;position:relative}
+.container{max-width:1100px;margin:0 auto;padding:0 32px}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(139,124,247,.06),transparent 70%);top:-100px;right:-200px;pointer-events:none;animation:heroPulse 8s ease-in-out infinite alternate}
+.hero::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.04),transparent 70%);bottom:-100px;left:-100px;pointer-events:none;animation:heroPulse 10s ease-in-out infinite alternate-reverse}
+@keyframes heroPulse{from{transform:scale(1);opacity:.5}to{transform:scale(1.2);opacity:1}}
+.hero-content{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(139,124,247,.08);border:1px solid rgba(139,124,247,.1);font-size:12px;color:var(--accent);margin-bottom:32px;font-weight:500}
+.hero-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:dotPulse 2s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(40px,7vw,80px);font-weight:700;line-height:1.02;letter-spacing:-.04em;margin-bottom:24px}
+.hero p{font-size:clamp(16px,2vw,20px);color:var(--dim);max-width:560px;line-height:1.6;margin-bottom:40px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn{padding:16px 32px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--accent2);color:#fff;box-shadow:0 4px 30px rgba(139,124,247,.25)}
+.btn-primary:hover{background:#7a6de6;transform:translateY(-3px);box-shadow:0 8px 40px rgba(139,124,247,.35)}
+.btn-ghost{background:rgba(255,255,255,.03);color:var(--fg);border:1px solid var(--muted)}
+.btn-ghost:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
+
+/* Stats bar */
+.stats{padding:0 0 80px}
+.stats-inner{display:flex;justify-content:center;gap:60px;padding:40px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid var(--muted)}
+.stat{text-align:center}
+.stat-num{font-size:36px;font-weight:700;letter-spacing:-.03em}
+.stat-label{font-size:12px;color:var(--dim);margin-top:4px}
+
+/* Features — flowing cards */
+.features{padding:120px 0}
+.section-overline{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--accent);margin-bottom:16px;font-weight:500}
+.section-title{font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-bottom:20px}
+.section-desc{font-size:17px;color:var(--dim);max-width:500px;line-height:1.7;margin-bottom:60px}
+.f-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.f-card{padding:36px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid var(--muted);transition:all .4s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+.f-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,169,255,.2),transparent);opacity:0;transition:opacity .4s}
+.f-card:hover{border-color:rgba(184,169,255,.12);transform:translateY(-4px);background:rgba(255,255,255,.03)}
+.f-card:hover::before{opacity:1}
+.f-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:22px;background:rgba(139,124,247,.06);border:1px solid rgba(139,124,247,.08)}
+.f-card h3{font-size:17px;font-weight:600;margin-bottom:10px;letter-spacing:-.01em}
+.f-card p{font-size:14px;color:var(--dim);line-height:1.65}
+
+/* How it works — horizontal flow */
+.how{padding:120px 0;background:rgba(255,255,255,.01)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px}
+.how-step{padding:40px 32px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid var(--muted);position:relative;transition:all .3s}
+.how-step:hover{border-color:rgba(184,169,255,.1);transform:translateY(-2px)}
+.how-num{font-size:48px;font-weight:700;letter-spacing:-.04em;background:linear-gradient(135deg,rgba(184,169,255,.2),rgba(139,124,247,.08));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
+.how-step h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.how-step p{font-size:13px;color:var(--dim);line-height:1.6}
+
+/* Marquee */
+.marquee-wrap{overflow:hidden;padding:60px 0;border-top:1px solid var(--muted);border-bottom:1px solid var(--muted)}
+.marquee{display:flex;gap:60px;animation:marqueeScroll 20s linear infinite;width:fit-content}
+.marquee span{font-size:clamp(40px,6vw,72px);font-weight:700;letter-spacing:-.03em;white-space:nowrap;color:rgba(255,255,255,.06);-webkit-text-stroke:1px rgba(255,255,255,.08)}
+@keyframes marqueeScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* CTA */
+.cta{padding:120px 0;text-align:center}
+.cta-box{padding:64px 48px;border-radius:24px;background:linear-gradient(135deg,rgba(139,124,247,.06),rgba(59,130,246,.03));border:1px solid rgba(184,169,255,.1);position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(139,124,247,.08),transparent);top:-150px;right:-100px;pointer-events:none}
+.cta h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.cta p{color:var(--dim);font-size:16px;margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto}
+
+/* Footer */
+footer{padding:48px 0;border-top:1px solid var(--muted)}
+.footer-inner{max-width:1100px;margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center}
+footer p{font-size:12px;color:var(--dim)}
+footer a{color:var(--accent);text-decoration:none}
+
+@media(max-width:768px){
+  .f-grid,.how-grid{grid-template-columns:1fr}
+  .stats-inner{flex-direction:column;gap:24px}
+  .nav-links{display:none}
+  .footer-inner{flex-direction:column;gap:16px;text-align:center}
+  section{padding:80px 0}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a href="#" class="nav-logo">
+      <div class="ico">M</div>
+      <span style="font-size:15px;font-weight:600">MiMo Code</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="https://t.me/mimo1ai_bot" class="nav-cta">Open Bot →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-tag reveal"><span class="dot"></span> AI-Powered Remote Control</div>
+      <h1 class="reveal reveal-delay">Управляй ПК<br>из <span class="grad">Telegram</span></h1>
+      <p class="reveal reveal-delay2">Мощный AI-ассистент, который даёт тебе полный контроль над твоим компьютером из мессенджера. Чат, терминал, мониторинг — всё в одном.</p>
+      <div class="hero-btns reveal reveal-delay3">
+        <a href="https://t.me/mimo1ai_bot" target="_blank" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+          Начать
+        </a>
+        <a href="#features" class="btn btn-ghost">Узнать больше ↓</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats reveal">
+  <div class="container">
+    <div class="stats-inner">
+      <div class="stat"><div class="stat-num grad">24/7</div><div class="stat-label">Доступность</div></div>
+      <div class="stat"><div class="stat-num grad-green">0$</div><div class="stat-label">Стоимость</div></div>
+      <div class="stat"><div class="stat-num grad">3</div><div class="stat-label">Вкладки</div></div>
+      <div class="stat"><div class="stat-num grad-green">∞</div><div class="stat-label">Возможности</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-overline reveal">Features</div>
+    <div class="section-title reveal reveal-delay">Всё что тебе нужно</div>
+    <div class="section-desc reveal reveal-delay2">Чат с AI, мониторинг систем, терминал и файлы — всё из одного окна в Telegram.</div>
+    <div class="f-grid">
+      <div class="f-card reveal">
+        <div class="f-icon">💬</div>
+        <h3>Чат с AI</h3>
+        <p>Общайся с MiMo Code напрямую из Telegram. Задавай вопросы, получай помощь с кодом, задачами и идеями.</p>
+      </div>
+      <div class="f-card reveal reveal-delay">
+        <div class="f-icon">📊</div>
+        <h3>Мониторинг ПК</h3>
+        <p>Отслеживай нагрузку CPU, RAM, температуру GPU и использование VRAM в реальном времени.</p>
+      </div>
+      <div class="f-card reveal reveal-delay2">
+        <div class="f-icon">⚡</div>
+        <h3>Терминал</h3>
+        <p>Запускай команды на удалённом ПК прямо из чата. Полный контроль без SSH.</p>
+      </div>
+      <div class="f-card reveal reveal-delay3">
+        <div class="f-icon">📁</div>
+        <h3>Файлы</h3>
+        <p>Загружай фото, скрипты и датасеты с любого устройства. Drag & drop прямо в чат.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-overline reveal">How it works</div>
+    <div class="section-title reveal reveal-delay">Три простых шага</div>
+    <div class="how-grid">
+      <div class="how-step reveal">
+        <div class="how-num">01</div>
+        <h3>Нажми /start</h3>
+        <p>Найди бота @mimo1ai_bot в Telegram и отправь команду /start</p>
+      </div>
+      <div class="how-step reveal reveal-delay">
+        <div class="how-num">02</div>
+        <h3>Открой Mini App</h3>
+        <p>Нажми кнопку чтобы открыть интерфейс управления прямо в Telegram</p>
+      </div>
+      <div class="how-step reveal reveal-delay2">
+        <div class="how-num">03</div>
+        <h3>Управляй</h3>
+        <p>Общайся с AI, запускай команды, загружай файлы — всё удалённо</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-wrap reveal">
+  <div class="marquee">
+    <span>MI MO CODE</span><span>REMOTE CONTROL</span><span>AI ASSISTANT</span><span>TELEGRAM BOT</span><span>MI MO CODE</span><span>REMOTE CONTROL</span><span>AI ASSISTANT</span><span>TELEGRAM BOT</span>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <h2>Готов начать?</h2>
+      <p>Бесплатно, без регистрации. Просто открой бота и попробуй.</p>
+      <a href="https://t.me/mimo1ai_bot" target="_blank" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        Открыть MiMo Code
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <p>MiMo Code © 2026</p>
+    <p><a href="https://t.me/mimo1ai_bot" target="_blank">t.me/mimo1ai_bot</a></p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav shrink on scroll
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.padding = window.scrollY > 50 ? '10px 0' : '18px 0';
+});
+</script>
+</body>
+</html>

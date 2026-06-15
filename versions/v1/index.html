@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MiMo Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0b0e;--bg2:#131216;--bg3:#1a191e;
+  --fg:rgba(255,255,255,.88);--dim:rgba(255,255,255,.32);--muted:rgba(255,255,255,.12);
+  --accent:#b8a9ff;--accent2:#8b7cf7;--accent3:rgba(139,124,247,.08);
+  --green:#7ee8a0;--red:#f27070;--blue:#7eb8f2;--yellow:#f2d07e;
+  --r:14px;--r2:18px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:'Space Grotesk',system-ui,sans-serif}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:2px}
+button,input,textarea{font-family:inherit;border:none;background:none;outline:none;color:inherit}
+
+.app{display:flex;height:100vh;height:100dvh;position:relative;z-index:1}
+
+/* ===== SIDEBAR ===== */
+.side{width:280px;display:flex;flex-direction:column;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--muted)}
+.s-head{padding:24px 20px 20px;display:flex;align-items:center;gap:12px}
+.s-logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6c5ce7);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;position:relative}
+.s-logo::after{content:'';position:absolute;inset:-3px;border-radius:15px;border:1px solid rgba(184,169,255,.12)}
+.s-name{font-size:15px;font-weight:600;letter-spacing:-.02em}
+.s-sub{font-size:10px;color:var(--dim);letter-spacing:.04em;margin-top:1px}
+.s-new{margin:2px 16px 12px;padding:11px;border-radius:var(--r);background:var(--accent3);color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;border:1px solid rgba(184,169,255,.06)}
+.s-new:hover{background:rgba(139,124,247,.12);border-color:rgba(184,169,255,.12)}
+.s-new:active{transform:scale(.98)}
+.s-list{flex:1;overflow-y:auto;padding:0 10px}
+.s-label{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);padding:12px 8px 6px;font-weight:500}
+.s-item{padding:9px 12px;border-radius:10px;font-size:12px;color:var(--dim);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;border:1px solid transparent}
+.s-item:hover{color:rgba(255,255,255,.55);background:rgba(255,255,255,.02)}
+.s-item.active{color:var(--accent);background:rgba(139,124,247,.05);border-color:rgba(139,124,247,.06)}
+.s-item span.txt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-item .del{opacity:0;color:var(--dim);font-size:13px;padding:3px 5px;border-radius:6px;transition:all .15s;flex-shrink:0}
+.s-item:hover .del{opacity:1}
+.s-item .del:hover{color:var(--red);background:rgba(242,112,112,.08)}
+.s-item .tok{font-size:9px;color:var(--dim);margin-left:auto;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.03);flex-shrink:0}
+.s-item{position:relative}
+
+/* Status */
+.s-status{border-top:1px solid var(--muted);padding:16px 20px}
+.s-st{font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);font-weight:500;margin-bottom:12px}
+.st-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:5px}
+.st-row .lbl{color:var(--dim);display:flex;align-items:center;gap:6px}
+.st-row .val{font-family:'DM Mono',monospace;color:rgba(255,255,255,.45);font-size:10px}
+.st-dot{width:4px;height:4px;border-radius:50%}
+.st-bar{height:1.5px;background:var(--muted);border-radius:1px;margin-bottom:8px;overflow:hidden}
+.st-bar div{height:100%;border-radius:1px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* ===== MAIN ===== */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;gap:4px;padding:8px 16px;flex-shrink:0}
+.tab{padding:7px 16px;border-radius:10px;font-size:11px;font-weight:500;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;letter-spacing:.01em}
+.tab:hover{color:rgba(255,255,255,.5);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--accent);background:var(--accent3)}
+.tab svg{width:13px;height:13px;opacity:.5}
+.tab.active svg{opacity:1}
+.panel{display:none;flex:1;flex-direction:column;min-height:0}
+.panel.active{display:flex}
+
+/* ===== CHAT ===== */
+.msgs{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:10px;max-width:700px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{flex-direction:row-reverse;margin-left:auto}
+.msg .av{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;letter-spacing:.02em}
+.msg.user .av{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--muted)}
+.msg.assistant .av{background:linear-gradient(135deg,var(--accent2),#6c5ce7);color:#fff}
+.msg .bbl{padding:10px 15px;border-radius:var(--r2);font-size:13px;line-height:1.6;word-break:break-word;max-width:calc(100% - 46px)}
+.msg.user .bbl{background:var(--accent2);color:#fff;border-bottom-right-radius:4px}
+.msg.assistant .bbl{background:var(--bg3);color:var(--fg);border:1px solid var(--muted);border-bottom-left-radius:4px}
+.msg .bbl pre{background:rgba(0,0,0,.2);border:1px solid var(--muted);border-radius:10px;padding:10px 12px;margin:6px 0;overflow-x:auto;font-size:11px;font-family:'DM Mono',monospace}
+.msg .bbl code{background:rgba(139,124,247,.1);padding:1px 5px;border-radius:4px;font-size:11px;font-family:'DM Mono',monospace;color:var(--accent)}
+.msg .bbl img{max-width:100%;border-radius:10px;margin:4px 0}
+
+.typing{display:flex;gap:4px;padding:2px 0}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:tp 1.4s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.2}30%{transform:translateY(-5px);opacity:1}}
+
+/* Chat bar */
+.chat-bar{padding:8px 16px 12px;flex-shrink:0;border-top:1px solid var(--muted)}
+.chat-row{display:flex;gap:8px;align-items:flex-end;max-width:700px;margin:0 auto}
+.chat-wrap{flex:1;position:relative;background:var(--bg3);border:1px solid var(--muted);border-radius:var(--r);transition:border-color .2s;overflow:hidden}
+.chat-wrap:focus-within{border-color:rgba(184,169,255,.2)}
+#chatIn{width:100%;background:none;color:var(--fg);font-size:13px;line-height:1.5;outline:none;resize:none;padding:11px 14px;min-height:42px;max-height:140px;overflow-y:auto}
+#chatIn::placeholder{color:var(--dim)}
+.chat-btns{display:flex;gap:4px;align-items:center}
+.chat-attach{color:var(--dim);padding:5px;cursor:pointer;border-radius:8px;transition:all .15s}
+.chat-attach:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+.chat-attach svg{width:17px;height:17px}
+.chat-send{width:40px;height:40px;border-radius:12px;background:var(--accent2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.chat-send:hover{background:#7a6de6;transform:translateY(-1px)}
+.chat-send:active{transform:scale(.95)}
+
+/* ===== TERMINAL ===== */
+.term-wrap{flex:1;overflow-y:auto;padding:14px 20px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7}
+.term-stdout{color:rgba(255,255,255,.6)}
+.term-stderr{color:var(--red)}
+.term-info{color:var(--dim);font-style:italic}
+.term-bar{padding:8px 16px;display:flex;gap:8px}
+.term-in{flex:1;border-radius:10px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--green);background:var(--bg3);border:1px solid var(--muted)}
+.term-in:focus{border-color:rgba(126,232,160,.15)}
+.term-in::placeholder{color:rgba(255,255,255,.1)}
+.term-btn{padding:0 14px;border-radius:10px;font-size:11px;font-weight:500;border:1px solid var(--muted);transition:all .15s}
+.t-go{color:var(--green);background:rgba(126,232,160,.04)}
+.t-go:hover{background:rgba(126,232,160,.08)}
+.t-stop{color:var(--red);background:rgba(242,112,112,.04)}
+.t-stop:hover{background:rgba(242,112,112,.08)}
+
+/* ===== FILES ===== */
+.files-wrap{flex:1;overflow-y:auto;padding:16px 24px}
+.drop{border:1.5px dashed var(--muted);border-radius:var(--r2);padding:36px;text-align:center;cursor:pointer;transition:all .25s}
+.drop:hover,.drop.over{border-color:rgba(184,169,255,.2);background:rgba(139,124,247,.02)}
+.drop p{color:var(--dim);font-size:12px;margin-top:8px}
+.drop .sub{font-size:10px;color:rgba(255,255,255,.1);margin-top:3px}
+.file{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;margin-top:6px;border:1px solid var(--muted);transition:all .15s;background:rgba(255,255,255,.015)}
+.file:hover{border-color:rgba(255,255,255,.08)}
+.file .fn{font-size:12px;font-weight:500}
+.file .fs{font-size:10px;color:var(--dim);margin-top:1px}
+.file .fd{color:var(--dim);cursor:pointer;border:none;background:none;padding:5px;border-radius:6px;transition:all .15s}
+.file .fd:hover{color:var(--red);background:rgba(242,112,112,.06)}
+.file-img{border-radius:12px;overflow:hidden;margin-top:6px;border:1px solid var(--muted)}
+.file-img img{width:100%;max-height:180px;object-fit:cover;display:block}
+.file-img .fi-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.015)}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .side{position:fixed;left:-280px;top:0;bottom:0;z-index:50;transition:left .3s ease;background:rgba(12,11,14,.97);backdrop-filter:blur(30px)}
+  .side.open{left:0}
+  .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;backdrop-filter:blur(3px)}
+  .ov.show{display:block}
+  .m-hdr{display:flex!important}
+  .m-bar{display:flex!important}
+  .tabs{display:none}
+  .nav-m{display:flex!important}
+}
+@media(min-width:769px){.m-hdr,.m-bar,.ov,.nav-m{display:none!important}}
+.m-hdr{display:none;padding:12px 16px;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--muted)}
+.m-hdr .ml{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6c5ce7);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.m-hdr .mt{flex:1;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.m-hdr button{padding:4px;color:var(--dim)}
+.m-hdr button svg{width:20px;height:20px}
+.m-bar{display:none;gap:12px;padding:8px 16px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--muted)}
+.m-bar::-webkit-scrollbar{display:none}
+.mi{display:flex;align-items:center;gap:5px;font-size:9px;white-space:nowrap;color:var(--dim)}
+.md{width:3px;height:3px;border-radius:50%}
+.mv{font-family:'DM Mono',monospace;color:rgba(255,255,255,.4);font-size:9px}
+.nav-m{display:none;background:var(--bg2);border-top:1px solid var(--muted);flex-shrink:0}
+.nav-m button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0;color:rgba(255,255,255,.2);font-size:8px;cursor:pointer;transition:color .2s;letter-spacing:.02em}
+.nav-m button.active{color:var(--accent)}
+.nav-m button svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="s-head">
+      <div class="s-logo">M</div>
+      <div><div class="s-name">MiMo Code</div><div class="s-sub">Remote Assistant</div></div>
+    </div>
+    <button class="s-new" onclick="newChat()">+ Новый чат</button>
+    <div class="s-list" id="sList"><div class="s-label">Сессии</div></div>
+    <div class="s-status">
+      <div class="s-st">Session</div>
+      <div class="st-row"><span class="lbl">Tokens used</span><span class="val" id="tokens">0</span></div>
+      <div class="s-st" style="margin-top:12px">System</div>
+      <div class="st-row"><span class="lbl"><span class="st-dot" style="background:var(--green)"></span>CPU</span><span class="val" id="s-cpu">--</span></div>
+      <div class="st-bar"><div id="b-cpu" style="background:var(--green);width:0"></div></div>
+      <div class="st-row"><span class="lbl"><span class="st-dot" style="background:var(--blue)"></span>RAM</span><span class="val" id="s-ram">--</span></div>
+      <div class="st-bar"><div id="b-ram" style="background:var(--blue);width:0"></div></div>
+      <div class="st-row"><span class="lbl"><span class="st-dot" style="background:var(--accent)"></span>GPU</span><span class="val" id="s-gpu">--</span></div>
+      <div class="st-bar"><div id="b-gpu" style="background:var(--accent);width:0"></div></div>
+      <div class="st-row"><span class="lbl"><span class="st-dot" style="background:var(--yellow)"></span>VRAM</span><span class="val" id="s-vram">--</span></div>
+      <div class="st-bar"><div id="b-vram" style="background:var(--yellow);width:0"></div></div>
+    </div>
+  </aside>
+  <div class="ov" id="ov" onclick="closeS()"></div>
+  <div class="main">
+    <div class="m-hdr">
+      <button onclick="openS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="ml">M</div>
+      <div class="mt">MiMo Code</div>
+    </div>
+    <div class="m-bar">
+      <div class="mi"><div class="md" style="background:var(--green)"></div>CPU <span class="mv" id="m-cpu">--</span></div>
+      <div class="mi"><div class="md" style="background:var(--blue)"></div>RAM <span class="mv" id="m-ram">--</span></div>
+      <div class="mi"><div class="md" style="background:var(--accent)"></div>GPU <span class="mv" id="m-gpu">--</span></div>
+      <div class="mi"><div class="md" style="background:var(--yellow)"></div>VRAM <span class="mv" id="m-vram">--</span></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="swTab('chat')" id="t-chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Чат</button>
+      <button class="tab" onclick="swTab('term')" id="t-term"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Терминал</button>
+      <button class="tab" onclick="swTab('files')" id="t-files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Файлы</button>
+    </div>
+    <div class="panel active" id="p-chat">
+      <div class="msgs" id="msgs"></div>
+      <div class="chat-bar">
+        <div class="chat-row">
+          <div class="chat-wrap"><textarea id="chatIn" rows="1" placeholder="Сообщение MiMo..." onkeydown="hKey(event)" oninput="aGrow(this)"></textarea></div>
+          <input type="file" id="cFile" multiple hidden onchange="chatUp(this.files)" accept="image/*,.py,.csv,.json,.txt,.pt,.pth,.zip">
+          <div class="chat-btns">
+            <button class="chat-attach" onclick="document.getElementById('cFile').click()" title="Файл"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
+            <button class="chat-send" onclick="send()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="p-term">
+      <div class="term-wrap" id="termOut"><div class="term-info">$ Готово</div></div>
+      <div class="term-bar">
+        <input class="term-in" id="termIn" placeholder="Команда..." onkeydown="if(event.key==='Enter')tRun()">
+        <button class="term-btn t-go" onclick="tRun()">▶</button>
+        <button class="term-btn t-stop" onclick="tStop()">■</button>
+      </div>
+    </div>
+    <div class="panel" id="p-files">
+      <div class="files-wrap">
+        <div class="drop" id="dz" onclick="document.getElementById('fIn').click()">
+          <input type="file" id="fIn" multiple hidden onchange="fUp(this.files)" accept="image/*,.py,.csv,.json,.txt,.pt,.pth,.zip">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(184,169,255,.2)" stroke-width="1.5" style="margin:0 auto;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <p>Перетащите файлы</p>
+          <p class="sub">Фото, скрипты, датасеты</p>
+        </div>
+        <div id="fList"></div>
+      </div>
+    </div>
+    <div class="nav-m">
+      <button class="active" onclick="swTab('chat')" id="n-chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Чат</button>
+      <button onclick="swTab('term')" id="n-term"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Терминал</button>
+      <button onclick="swTab('files')" id="n-files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Файлы</button>
+    </div>
+  </div>
+</div>
+<script>
+const API='';let sid=null,sessions=[];
+async function api(p,o={}){try{const r=await fetch(API+p,{headers:{'Content-Type':'application/json'},...o});return await r.json()}catch(e){return{}}}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB'}
+function openS(){document.getElementById('side').classList.add('open');document.getElementById('ov').classList.add('show')}
+function closeS(){document.getElementById('side').classList.remove('open');document.getElementById('ov').classList.remove('show')}
+function aGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px'}
+function hKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+
+async function loadS(){const d=await api('/api/sessions');sessions=d.sessions||[];renderS()}
+function renderS(){const el=document.getElementById('sList');const MAX_CTX=1000000;el.innerHTML='<div class="s-label">Сессии</div>'+sessions.map(s=>{const t=s.title.length>32?s.title.slice(0,32)+'…':s.title;const tok=s.tokens||0;const pct=Math.min(100,Math.round(tok/MAX_CTX*100));const tokStr=tok>1000000?(tok/1000000).toFixed(1)+'M':tok>1000?(tok/1000).toFixed(1)+'k':tok;return`<div class="s-item${s.id===sid?' active':''}" onclick="selS('${s.id}');closeS()"><span class="txt">${esc(t)}</span><span class="tok">${tokStr} tokens · ${pct}%</span><span class="del" onclick="event.stopPropagation();delS('${s.id}')">✕</span></div>`}).join('')}
+async function newChat(){const d=await api('/api/sessions',{method:'POST'});sid=d.id;await loadS();document.getElementById('msgs').innerHTML='';closeS()}
+async function selS(id){sid=id;renderS();const d=await api('/api/sessions/'+id+'/messages');const el=document.getElementById('msgs');el.innerHTML='';const msgs=d.messages||[];msgs.forEach(m=>addM(m.role,m.text));msgCount=msgs.length;lastShownText=msgs.length?msgs[msgs.length-1].text:'';el.scrollTop=el.scrollHeight;const tok=d.tokens||0;const tkEl=document.getElementById('tokens');if(tkEl)tkEl.textContent=tok>1000?(tok/1000).toFixed(1)+'k':tok}
+async function delS(id){if(!confirm('Удалить?'))return;await api('/api/sessions/'+id,{method:'DELETE'});if(sid===id){sid=null;document.getElementById('msgs').innerHTML=''}await loadS()}
+
+function addM(role,text){const el=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+role;d.innerHTML=`<div class="av">${role==='user'?'U':'M'}</div><div class="bbl">${fmt(text)}</div>`;el.appendChild(d);el.scrollTop=el.scrollHeight;return d}
+function addImg(role,url){const el=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+role;d.innerHTML=`<div class="av">${role==='user'?'U':'M'}</div><div class="bbl"><img src="${url}"></div>`;el.appendChild(d);el.scrollTop=el.scrollHeight}
+function fmt(s){if(!s)return'';s=esc(s).replace(/\n/g,'<br>');s=s.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre>$2</pre>');s=s.replace(/`([^`]+)`/g,'<code>$1</code>');return s}
+function showTyp(){const el=document.getElementById('msgs');const d=document.createElement('div');d.className='msg assistant';d.id='typing';d.innerHTML=`<div class="av">M</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>`;el.appendChild(d);el.scrollTop=el.scrollHeight;return d}
+async function send(){const inp=document.getElementById('chatIn');const t=inp.value.trim();if(!t)return;inp.value='';inp.style.height='auto';if(!sid){const d=await api('/api/sessions',{method:'POST'});sid=d.id;await loadS()};addM('user',t);showTyp();try{await api('/api/chat',{method:'POST',body:JSON.stringify({session_id:sid,text:t})});setTimeout(pollR,1500)}catch(e){removeTyp();addM('assistant','Error: '+e.message)}}
+async function chatUp(files){if(!sid){const d=await api('/api/sessions',{method:'POST'});sid=d.id;await loadS()}
+for(const f of files){const fd=new FormData();fd.append('file',f);await fetch(API+'/api/files/upload',{method:'POST',body:fd});if(/\.(png|jpe?g|gif|webp)$/i.test(f.name)){addImg('user',API+'/api/files/raw/'+encodeURIComponent(f.name))}else{addM('user','📎 '+f.name+' ('+fmtSize(f.size)+')')}}}
+let msgCount=0;let lastShownText='';
+async function pollR(){if(!sid)return;for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,2000));try{const d=await api('/api/sessions/'+sid+'/messages');const msgs=d.messages||[];for(let j=msgs.length-1;j>=0;j--){const m=msgs[j];if(m.role==='assistant'&&m.text&&m.text!==lastShownText){removeTyp();addM('assistant',m.text);lastShownText=m.text;msgCount=msgs.length;return}}}catch(e){}}
+removeTyp();addM('assistant','[Нет ответа]')}
+function removeTyp(){const t=document.getElementById('typing');if(t)t.remove()}
+
+function swTab(n){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.nav-m button').forEach(b=>b.classList.remove('active'));const t=document.getElementById('t-'+n);if(t)t.classList.add('active');const m=document.getElementById('n-'+n);if(m)m.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+n).classList.add('active');if(n==='files')loadF()}
+
+let tp=null;async function tRun(){const inp=document.getElementById('termIn');const c=inp.value.trim();if(!c)return;inp.value='';await api('/api/terminal/start',{method:'POST',body:JSON.stringify({command:c})});tp=setInterval(pollT,500)}
+async function tStop(){await api('/api/terminal/stop',{method:'POST'})}
+async function pollT(){const d=await api('/api/terminal/output');const el=document.getElementById('termOut');el.innerHTML='';(d.output||[]).forEach(l=>{const c=l.type==='stderr'?'term-stderr':l.type==='info'?'term-info':'term-stdout';el.innerHTML+=`<div class="${c}">${esc(l.text)}</div>`});el.scrollTop=el.scrollHeight;if(!d.running&&tp){clearInterval(tp);tp=null}}
+
+async function loadF(){const d=await api('/api/files');const el=document.getElementById('fList');const files=d.files||[];const isImg=n=>/\.(png|jpe?g|gif|webp)$/i.test(n);el.innerHTML=files.length?files.map(f=>{
+if(isImg(f.name))return`<div class="file-img"><img src="${API}/api/files/raw/${encodeURIComponent(f.name)}" loading="lazy"><div class="fi-bar"><div><div class="fn">${esc(f.name)}</div><div class="fs">${fmtSize(f.size)}</div></div><button class="fd" onclick="delF('${esc(f.name)}')">✕</button></div></div>`;
+return`<div class="file"><div><div class="fn">${esc(f.name)}</div><div class="fs">${fmtSize(f.size)}</div></div><button class="fd" onclick="delF('${esc(f.name)}')">✕</button></div>`}).join(''):'<p style="text-align:center;color:var(--dim);padding:24px;font-size:12px">Нет файлов</p>'}
+async function fUp(files){for(const f of files){const fd=new FormData();fd.append('file',f);await fetch(API+'/api/files/upload',{method:'POST',body:fd})}loadF()}
+async function delF(n){await api('/api/files/'+encodeURIComponent(n),{method:'DELETE'});loadF()}
+const dz=document.getElementById('dz');dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});dz.addEventListener('dragleave',()=>dz.classList.remove('over'));dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');fUp(e.dataTransfer.files)});
+
+async function pollSt(){const s=await api('/api/status');if(!s.cpu)return;[['cpu',s.cpu,''],['ram',s.ram_pct,''],['gpu',s.gpu_temp,'°C'],['vram',s.vram_pct,'%']].forEach(([k,v,suf])=>{const el=document.getElementById('s-'+k);if(el)el.textContent=v+suf;const mel=document.getElementById('m-'+k);if(mel)mel.textContent=v+suf;const bar=document.getElementById('b-'+k);if(bar)bar.style.width=Math.min(v,100)+'%'})}
+loadS();pollSt();setInterval(pollSt,5000);
+</script>
+</body>
+</html>

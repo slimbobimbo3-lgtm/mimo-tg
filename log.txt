@@ -1,0 +1,38 @@
+INFO:     Started server process [396]
+INFO:     Waiting for application startup.
+INFO:mimo:Ngrok token not set, using local URL: http://localhost:8765
+INFO:mimo:Bot polling started
+INFO:mimo:Watchdogs started
+INFO:mimo:Waiting for ngrok... (1/30)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8765 (Press CTRL+C to quit)
+INFO:mimo:Waiting for ngrok... (2/30)
+INFO:mimo:Waiting for ngrok... (3/30)
+INFO:mimo:Waiting for ngrok... (4/30)
+INFO:mimo:Waiting for ngrok... (5/30)
+INFO:mimo:Waiting for ngrok... (6/30)
+INFO:mimo:Waiting for ngrok... (7/30)
+INFO:mimo:Waiting for ngrok... (8/30)
+INFO:mimo:Waiting for ngrok... (9/30)
+INFO:mimo:Waiting for ngrok... (10/30)
+INFO:mimo:Waiting for ngrok... (11/30)
+INFO:mimo:Waiting for ngrok... (12/30)
+INFO:mimo:Waiting for ngrok... (13/30)
+INFO:mimo:Waiting for ngrok... (14/30)
+INFO:mimo:Waiting for ngrok... (15/30)
+INFO:mimo:Waiting for ngrok... (16/30)
+INFO:mimo:Waiting for ngrok... (17/30)
+INFO:mimo:Waiting for ngrok... (18/30)
+INFO:mimo:Waiting for ngrok... (19/30)
+INFO:mimo:Waiting for ngrok... (20/30)
+INFO:mimo:Waiting for ngrok... (21/30)
+INFO:mimo:Waiting for ngrok... (22/30)
+INFO:mimo:Waiting for ngrok... (23/30)
+INFO:mimo:Waiting for ngrok... (24/30)
+INFO:mimo:Waiting for ngrok... (25/30)
+INFO:mimo:Waiting for ngrok... (26/30)
+INFO:mimo:Waiting for ngrok... (27/30)
+INFO:mimo:Waiting for ngrok... (28/30)
+INFO:mimo:Waiting for ngrok... (29/30)
+INFO:mimo:Waiting for ngrok... (30/30)
+ERROR:mimo:No HTTPS tunnel URL after 60s, bot not started
